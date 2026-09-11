@@ -23,6 +23,10 @@ struct Args {
     /// Path to the unprocessed file
     #[arg(short = 'u', long, default_value = "./unprocessed.txt")]
     unprocessed: PathBuf,
+
+    /// Overwrite Column B regardless of existing data
+    #[arg(long)]
+    overwrite: bool,
 }
 
 fn excel_serial_to_date(serial: f64) -> String {
@@ -88,12 +92,12 @@ fn main() -> Result<()> {
             };
 
             if xlsx_date == date_str {
-                // Check if column B is empty
+                // Check if column B is empty (unless overwrite is enabled)
                 let coord_b = format!("B{}", row_idx);
                 let item_val = sheet.value(coord_b.as_str());
                 
-                if !item_val.is_empty() {
-                    continue; // Item already filled, skip this row
+                if !args.overwrite && !item_val.is_empty() {
+                    continue; // Item already filled, skip this row (unless overwrite enabled)
                 }
 
                 // Check if rate (column E) > 130.00
